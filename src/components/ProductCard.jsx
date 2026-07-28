@@ -5,7 +5,7 @@ export default function ProductCard({ product, onAddToCart, onOpenDetails, isAdm
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizeWarning, setSizeWarning] = useState(false);
 
-  const sizes = ["P", "M", "G", "GG", "EG", "XG", "3G"];
+  const sizes = ["P", "M", "G", "XL", "2XL", "3XL"];
 
   // Calculate total stock across all sizes
   const totalStock = Object.values(product.stock).reduce((a, b) => a + b, 0);
