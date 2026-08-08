@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { X, Check, ShoppingBag, Plus, Trash2, Edit, Save, AlertCircle } from "lucide-react";
+import {
+  X,
+  Check,
+  ShoppingBag,
+  Plus,
+  Trash2,
+  Edit,
+  Save,
+  AlertCircle,
+} from "lucide-react";
+import { supabase } from "../lib/supabase";
 
-export default function ProductDetailsModal({ 
-  isOpen, 
-  onClose, 
-  product, 
-  onAddToCart, 
-  isAdmin = false, 
-  onUpdateProduct // Callback from parent to persist changes in products list
+export default function ProductDetailsModal({
+  isOpen,
+  onClose,
+  product,
+  onAddToCart,
+  isAdmin = false,
+  onUpdateProduct, // Callback from parent to persist changes in products list
 }) {
   const [selectedSize, setSelectedSize] = useState(null);
   const [sizeWarning, setSizeWarning] = useState(false);
@@ -47,7 +57,7 @@ export default function ProductDetailsModal({
   if (!isOpen || !product) return null;
 
   const sizes = ["P", "M", "G", "GG", "EG", "XG", "3G"];
-  
+
   // Size measurements sheet
   const sizeMeasurements = [
     { size: "P", width: "48 cm", length: "69 cm" },
@@ -56,7 +66,7 @@ export default function ProductDetailsModal({
     { size: "GG", width: "54 cm", length: "75 cm" },
     { size: "EG", width: "56 cm", length: "77 cm" },
     { size: "XG", width: "58 cm", length: "79 cm" },
-    { size: "3G", width: "60 cm", length: "81 cm" }
+    { size: "3G", width: "60 cm", length: "81 cm" },
   ];
 
   const handleAddClick = () => {
@@ -68,16 +78,46 @@ export default function ProductDetailsModal({
     onClose();
   };
 
-  // Image Upload -> Base64
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditImages((prev) => [...prev, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
+  // Image Upload -> Supabase Storage
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+
+    if (!files.length) return;
+
+    for (const file of files) {
+      try {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("products")
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error("Erro ao enviar imagem:", uploadError);
+          alert(`Erro ao enviar ${file.name}`);
+          continue;
+        }
+
+        const { data } = supabase.storage
+          .from("products")
+          .getPublicUrl(filePath);
+
+        if (data?.publicUrl) {
+          setEditImages((prev) => [...prev, data.publicUrl]);
+        }
+      } catch (error) {
+        console.error("Erro no upload:", error);
+        alert("Não foi possível enviar a imagem.");
+      }
+    }
+
+    // Permite selecionar novamente o mesmo arquivo
+    e.target.value = "";
   };
 
   const handleRemoveImage = (idxToRemove) => {
@@ -95,7 +135,7 @@ export default function ProductDetailsModal({
     const num = parseInt(val, 10);
     setEditStock((prev) => ({
       ...prev,
-      [size]: isNaN(num) ? 0 : num
+      [size]: isNaN(num) ? 0 : num,
     }));
   };
 
@@ -105,29 +145,34 @@ export default function ProductDetailsModal({
       title: editTitle,
       category: editCategory,
       price: parseFloat(editPrice) || 0,
-      originalPrice: editOriginalPrice !== "" ? parseFloat(editOriginalPrice) : undefined,
+      originalPrice:
+        editOriginalPrice !== "" ? parseFloat(editOriginalPrice) : undefined,
       description: editDescription,
       technicalDetails: editTechDetails,
       stock: editStock,
-      images: editImages
+      images: editImages,
     };
 
     onUpdateProduct(updated);
     setIsEditing(false);
   };
 
-  const totalStock = Object.values(isEditing ? editStock : product.stock).reduce((a, b) => a + b, 0);
+  const totalStock = Object.values(
+    isEditing ? editStock : product.stock,
+  ).reduce((a, b) => a + b, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
+      <div
+        className="fixed inset-0 bg-black/50 transition-opacity"
+        onClick={onClose}
+      />
 
       {/* Modal Container */}
       <div className="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col z-10 text-left border border-gray-100">
-        
         {/* Close Button */}
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 z-20 p-2 bg-[#F5F6F8] hover:bg-gray-200 text-text-sec hover:text-text-main rounded-full transition-colors"
         >
@@ -164,14 +209,18 @@ export default function ProductDetailsModal({
         )}
 
         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto">
-          
           {/* Left Column: Image Gallery & Upload controls */}
           <div className="space-y-4">
-            
             {/* Main Active Image */}
             <div className="relative pt-[100%] bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-xs">
               <img
-                src={isEditing ? editImages[activeImageIdx] : (product.images && product.images[activeImageIdx] ? product.images[activeImageIdx] : "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=600")}
+                src={
+                  isEditing
+                    ? editImages[activeImageIdx]
+                    : product.images && product.images[activeImageIdx]
+                      ? product.images[activeImageIdx]
+                      : "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=600"
+                }
                 alt={editTitle}
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -184,12 +233,18 @@ export default function ProductDetailsModal({
                   <button
                     onClick={() => setActiveImageIdx(idx)}
                     className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      activeImageIdx === idx ? "border-primary" : "border-gray-200 hover:border-gray-300"
+                      activeImageIdx === idx
+                        ? "border-primary"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                    <img
+                      src={img}
+                      alt={`Thumb ${idx}`}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
-                  
+
                   {/* Delete button on image for admins */}
                   {isEditing && (
                     <button
@@ -208,7 +263,9 @@ export default function ProductDetailsModal({
               {isEditing && (
                 <label className="w-16 h-16 border-2 border-dashed border-gray-300 hover:border-primary bg-[#F5F6F8] rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors text-text-sec hover:text-primary">
                   <Plus className="w-5 h-5" />
-                  <span className="text-[9px] font-bold font-inter mt-1">Upload</span>
+                  <span className="text-[9px] font-bold font-inter mt-1">
+                    Upload
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
@@ -234,7 +291,8 @@ export default function ProductDetailsModal({
                 />
               ) : (
                 <p className="text-xs font-inter text-text-sec leading-relaxed whitespace-pre-line">
-                  {product.technicalDetails || "Nenhuma informação técnica cadastrada."}
+                  {product.technicalDetails ||
+                    "Nenhuma informação técnica cadastrada."}
                 </p>
               )}
             </div>
@@ -242,22 +300,25 @@ export default function ProductDetailsModal({
 
           {/* Right Column: Descriptions, Size Selection, Measurements & Action Buttons */}
           <div className="flex flex-col space-y-6">
-            
             {/* Title & Category Info */}
             <div>
               {isEditing ? (
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-text-sec uppercase">Título do Manto</label>
+                  <label className="text-[10px] font-bold text-text-sec uppercase">
+                    Título do Manto
+                  </label>
                   <input
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold font-poppins focus:outline-none focus:border-primary"
                   />
-                  
+
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     <div>
-                      <label className="text-[10px] font-bold text-text-sec uppercase">Categoria</label>
+                      <label className="text-[10px] font-bold text-text-sec uppercase">
+                        Categoria
+                      </label>
                       <input
                         type="text"
                         value={editCategory}
@@ -266,7 +327,9 @@ export default function ProductDetailsModal({
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-text-sec uppercase">Preço Atacado</label>
+                      <label className="text-[10px] font-bold text-text-sec uppercase">
+                        Preço Atacado
+                      </label>
                       <input
                         type="number"
                         step="0.01"
@@ -278,7 +341,9 @@ export default function ProductDetailsModal({
                   </div>
 
                   <div className="mt-2">
-                    <label className="text-[10px] font-bold text-text-sec uppercase">Preço Original (De / Para - Opcional)</label>
+                    <label className="text-[10px] font-bold text-text-sec uppercase">
+                      Preço Original (De / Para - Opcional)
+                    </label>
                     <input
                       type="number"
                       step="0.01"
@@ -297,7 +362,7 @@ export default function ProductDetailsModal({
                   <h2 className="text-2xl sm:text-3xl font-extrabold font-poppins text-text-main mt-3">
                     {product.title}
                   </h2>
-                  
+
                   {/* Prices display */}
                   <div className="mt-3 flex items-baseline gap-3">
                     <span className="text-2xl font-bold font-montserrat text-[#0F766E]">
@@ -338,19 +403,25 @@ export default function ProductDetailsModal({
             {/* Sizes stock configuration or size selection */}
             <div>
               <h4 className="text-xs font-bold font-poppins text-text-main tracking-wider uppercase mb-3">
-                {isEditing ? "Editar Estoque por Tamanho" : "Selecione o Tamanho"}
+                {isEditing
+                  ? "Editar Estoque por Tamanho"
+                  : "Selecione o Tamanho"}
               </h4>
 
               {isEditing ? (
                 <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                   {sizes.map((size) => (
                     <div key={size} className="text-center">
-                      <label className="block text-[10px] font-bold text-text-sec uppercase mb-1 font-montserrat">{size}</label>
+                      <label className="block text-[10px] font-bold text-text-sec uppercase mb-1 font-montserrat">
+                        {size}
+                      </label>
                       <input
                         type="number"
                         min="0"
                         value={editStock[size] || 0}
-                        onChange={(e) => handleStockChange(size, e.target.value)}
+                        onChange={(e) =>
+                          handleStockChange(size, e.target.value)
+                        }
                         className="w-full bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs text-center font-bold focus:outline-none focus:border-primary font-montserrat"
                       />
                     </div>
@@ -375,8 +446,8 @@ export default function ProductDetailsModal({
                           !isAvailable
                             ? "bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed"
                             : isSelected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white text-text-main border-gray-200 hover:border-primary/50 hover:bg-[#F5F6F8]"
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white text-text-main border-gray-200 hover:border-primary/50 hover:bg-[#F5F6F8]"
                         }`}
                       >
                         {size}
@@ -398,20 +469,39 @@ export default function ProductDetailsModal({
                 <table className="min-w-full divide-y divide-gray-100 text-center">
                   <thead className="bg-[#F5F6F8]">
                     <tr>
-                      <th scope="col" className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins">Tamanho</th>
-                      <th scope="col" className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins">Largura</th>
-                      <th scope="col" className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins">Comprimento</th>
+                      <th
+                        scope="col"
+                        className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins"
+                      >
+                        Tamanho
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins"
+                      >
+                        Largura
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-4 py-2 text-[10px] font-bold text-text-sec uppercase font-poppins"
+                      >
+                        Comprimento
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-xs font-semibold text-text-main font-montserrat">
                     {sizeMeasurements.map((m) => (
-                      <tr 
-                        key={m.size} 
+                      <tr
+                        key={m.size}
                         className={`hover:bg-[#F5F6F8]/30 transition-colors ${selectedSize === m.size ? "bg-primary/5" : ""}`}
                       >
-                        <td className="px-4 py-1.5 font-bold text-primary">{m.size}</td>
+                        <td className="px-4 py-1.5 font-bold text-primary">
+                          {m.size}
+                        </td>
                         <td className="px-4 py-1.5 text-text-sec">{m.width}</td>
-                        <td className="px-4 py-1.5 text-text-sec">{m.length}</td>
+                        <td className="px-4 py-1.5 text-text-sec">
+                          {m.length}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -430,20 +520,19 @@ export default function ProductDetailsModal({
                     totalStock === 0
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                       : selectedSize
-                      ? "bg-primary hover:bg-primary-hover text-white cursor-pointer"
-                      : "bg-[#0f766e] hover:bg-[#115e59] text-white cursor-pointer"
+                        ? "bg-primary hover:bg-primary-hover text-white cursor-pointer"
+                        : "bg-[#0f766e] hover:bg-[#115e59] text-white cursor-pointer"
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  {selectedSize ? `ADICIONAR AO CARRINHO (TAMANHO ${selectedSize})` : "Adicionar ao Carrinho"}
+                  {selectedSize
+                    ? `ADICIONAR AO CARRINHO (TAMANHO ${selectedSize})`
+                    : "Adicionar ao Carrinho"}
                 </button>
               </div>
             )}
-
           </div>
-
         </div>
-
       </div>
     </div>
   );

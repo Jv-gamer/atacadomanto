@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
+import { supabase } from "./lib/supabase";
 // Register GSAP ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,10 +31,8 @@ import { defaultProducts, defaultCategories } from "./data/mockProducts";
 
 export default function App() {
   // --- Persistent States from LocalStorage ---
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem("atacadao_produtos");
-    return saved ? JSON.parse(saved) : defaultProducts;
-  });
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   const [categories, setCategories] = useState(() => {
     const saved = localStorage.getItem("atacadao_categorias");
@@ -79,10 +77,6 @@ export default function App() {
 
   // --- Sync States to LocalStorage ---
   useEffect(() => {
-    localStorage.setItem("atacadao_produtos", JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
     localStorage.setItem("atacadao_categorias", JSON.stringify(categories));
   }, [categories]);
 
@@ -99,6 +93,70 @@ export default function App() {
     // Refresh ScrollTrigger positions after page updates
     ScrollTrigger.refresh();
   }, [activeTab, selectedCategory, products, cartOpen]);
+
+  useEffect(() => {
+    async function loadProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Erro ao buscar produtos:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setProducts(data);
+      }
+    }
+
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    async function loadProducts() {
+      setLoadingProducts(true);
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("title");
+
+      if (error) {
+        console.error(error);
+
+        // Backup caso o banco esteja indisponível
+        setProducts(defaultProducts);
+      } else {
+        const formattedProducts = data.map((p) => ({
+          id: p.id,
+          title: p.title,
+          category: p.category,
+          description: p.description,
+          price: p.price,
+          originalPrice: p.original_price,
+          stock: p.stock,
+          images: p.images,
+          technicalDetails: p.technical_details,
+        }));
+
+        setProducts(formattedProducts);
+      }
+
+      setLoadingProducts(false);
+    }
+
+    loadProducts();
+  }, []);
+
+  if (loadingProducts) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        Carregando produtos...
+      </div>
+    );
+  }
 
   // --- Cart Handlers ---
   const handleAddToCart = (product, size) => {
@@ -163,22 +221,74 @@ export default function App() {
   };
 
   // --- Product CRUD Handlers ---
-  const handleUpdateProduct = (updatedProduct) => {
+  const handleUpdateProduct = async (updatedProduct) => {
+    const productData = {
+      id: updatedProduct.id,
+      title: updatedProduct.title,
+      category: updatedProduct.category,
+      description: updatedProduct.description,
+      price: updatedProduct.price,
+      original_price: updatedProduct.originalPrice ?? null,
+      stock: updatedProduct.stock,
+      images: updatedProduct.images,
+      technical_details: updatedProduct.technicalDetails ?? null,
+    };
+
+    // Se o produto já existe, atualiza
+    const { data, error } = await supabase
+      .from("products")
+      .upsert(productData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Erro ao salvar produto no Supabase:", error);
+      alert("Não foi possível salvar o produto.");
+      return;
+    }
+
+    // Atualiza a tela imediatamente
+    const formattedProduct = {
+      id: data.id,
+      title: data.title,
+      category: data.category,
+      description: data.description,
+      price: data.price,
+      originalPrice: data.original_price,
+      stock: data.stock,
+      images: data.images,
+      technicalDetails: data.technical_details,
+    };
+
     setProducts((prevProds) => {
-      const index = prevProds.findIndex((p) => p.id === updatedProduct.id);
+      const index = prevProds.findIndex((p) => p.id === formattedProduct.id);
+
       if (index > -1) {
         const next = [...prevProds];
-        next[index] = updatedProduct;
+        next[index] = formattedProduct;
         return next;
-      } else {
-        return [...prevProds, updatedProduct];
       }
+
+      return [...prevProds, formattedProduct];
     });
   };
 
-  const handleDeleteProduct = (productId) => {
+  const handleDeleteProduct = async (productId) => {
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId);
+
+    if (error) {
+      console.error("Erro ao excluir produto:", error);
+      alert("Não foi possível excluir o produto.");
+      return;
+    }
+
+    // Remove da tela
     setProducts((prevProds) => prevProds.filter((p) => p.id !== productId));
-    // Clean deleted item from cart
+
+    // Remove também do carrinho
     setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   };
 
@@ -295,8 +405,8 @@ export default function App() {
                       : "Catálogo Completo no Atacado"}
                   </h3>
                   <p className="text-xs text-text-sec font-medium font-inter mt-1.5">
-                    Preços especiais direto da distribuidora. Pedido mínimo de 5
-                    unidades.
+                    Preços especiais direto da distribuidora. Frete Grátis em 6
+                    peças.
                   </p>
                 </div>
                 <span className="text-xs font-bold font-montserrat text-primary mt-2 md:mt-0 uppercase tracking-widest bg-primary/10 px-2.5 py-1 rounded-md">
