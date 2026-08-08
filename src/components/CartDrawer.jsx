@@ -1,25 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { X, Trash2, Plus, Minus, Truck, Send, AlertTriangle, MapPin } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Plus,
+  Minus,
+  Truck,
+  Send,
+  AlertTriangle,
+  MapPin,
+} from "lucide-react";
 
-export default function CartDrawer({ 
-  isOpen, 
-  onClose, 
-  cartItems, 
-  onUpdateQuantity, 
-  onRemoveItem 
+export default function CartDrawer({
+  isOpen,
+  onClose,
+  cartItems,
+  onUpdateQuantity,
+  onRemoveItem,
 }) {
   const [cep, setCep] = useState("");
   const [address, setAddress] = useState(null);
   const [loadingCep, setLoadingCep] = useState(false);
   const [cepError, setCepError] = useState("");
-  
+
   // Shipping options
   const [shippingType, setShippingType] = useState(null); // 'pac' | 'sedex' | null
   const [shippingRates, setShippingRates] = useState({ pac: 0, sedex: 0 });
 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const itemsSubtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  
+  const itemsSubtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
   // Minimum B2B order rule
   const minOrderQuantity = 5;
   const isMinOrderMet = totalQuantity >= minOrderQuantity;
@@ -34,7 +46,7 @@ export default function CartDrawer({
   const handleCepSearch = async (e) => {
     e.preventDefault();
     const cleanCep = cep.replace(/\D/g, "");
-    
+
     if (cleanCep.length !== 8) {
       setCepError("Digite um CEP válido com 8 dígitos.");
       setAddress(null);
@@ -47,7 +59,9 @@ export default function CartDrawer({
     setShippingType(null);
 
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cleanCep}/json/`,
+      );
       const data = await response.json();
 
       if (data.erro) {
@@ -58,7 +72,7 @@ export default function CartDrawer({
           bairro: data.bairro || "Centro",
           cidade: data.localidade,
           uf: data.uf,
-          cep: data.cep
+          cep: data.cep,
         });
         calculateShipping(totalQuantity);
       }
@@ -70,16 +84,16 @@ export default function CartDrawer({
   };
 
   const calculateShipping = (qty) => {
-    // Castanhal-PA B2B Shipping Formula
+    // Castanhal-PA Shipping Formula
     // Base flat rates + weight incremental (R$ 3.00/unit for PAC, R$ 5.00/unit for SEDEX after first item)
-    const pacBase = 35.00;
-    const sedexBase = 65.00;
-    const pacExtra = (qty - 1) * 3.00;
-    const sedexExtra = (qty - 1) * 5.00;
+    const pacBase = 35.0;
+    const sedexBase = 65.0;
+    const pacExtra = (qty - 1) * 3.0;
+    const sedexExtra = (qty - 1) * 5.0;
 
     setShippingRates({
       pac: pacBase + Math.max(0, pacExtra),
-      sedex: sedexBase + Math.max(0, sedexExtra)
+      sedex: sedexBase + Math.max(0, sedexExtra),
     });
   };
 
@@ -90,9 +104,9 @@ export default function CartDrawer({
     if (!isMinOrderMet) return;
 
     // Compile WhatsApp message
-    let orderSummary = `*ATACADÃO DOS MANTOS* - NOVO PEDIDO B2B\n`;
+    let orderSummary = `*ATACADÃO DOS MANTOS* - NOVO PEDIDO\n`;
     orderSummary += `----------------------------------------\n\n`;
-    
+
     cartItems.forEach((item, idx) => {
       orderSummary += `*${idx + 1}. ${item.title}*\n`;
       orderSummary += `   Tamanho: ${item.size} | Qtd: ${item.quantity}\n`;
@@ -101,7 +115,7 @@ export default function CartDrawer({
 
     orderSummary += `----------------------------------------\n`;
     orderSummary += `*Subtotal dos Mantos:* R$ ${itemsSubtotal.toFixed(2)}\n`;
-    
+
     if (address && shippingType) {
       orderSummary += `*Frete (${shippingType.toUpperCase()}):* R$ ${selectedShippingCost.toFixed(2)}\n`;
       orderSummary += `*Prazo estimado:* ${shippingType === "pac" ? "8-15 dias úteis" : "3-6 dias úteis"}\n`;
@@ -111,13 +125,13 @@ export default function CartDrawer({
     } else {
       orderSummary += `*Frete:* A retirar / Combinar frete\n`;
     }
-    
+
     orderSummary += `\n*TOTAL FINAL:* R$ ${finalTotal.toFixed(2)}\n\n`;
     orderSummary += `----------------------------------------\n`;
     orderSummary += `Origem da Distribuidora: Castanhal-PA\n`;
     orderSummary += `Por favor, envie seus dados de faturamento para emitirmos seu boleto/chave PIX.`;
 
-    const whatsappUrl = `https://wa.me/5591999999999?text=${encodeURIComponent(orderSummary)}`;
+    const whatsappUrl = `https://wa.me/559192384582?text=${encodeURIComponent(orderSummary)}`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -126,15 +140,14 @@ export default function CartDrawer({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 transition-opacity" 
+      <div
+        className="absolute inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
       />
 
       <div className="absolute inset-y-0 right-0 max-w-full flex">
         {/* Drawer container */}
         <div className="w-screen max-w-md bg-white shadow-xl flex flex-col h-full text-left">
-          
           {/* Header */}
           <div className="p-6 border-b border-[#F0F0F0] flex items-center justify-between">
             <h2 className="text-lg font-bold font-poppins text-text-main flex items-center gap-2">
@@ -143,7 +156,7 @@ export default function CartDrawer({
                 {totalQuantity} {totalQuantity === 1 ? "peça" : "peças"}
               </span>
             </h2>
-            <button 
+            <button
               onClick={onClose}
               className="p-1 rounded-full text-text-sec hover:text-text-main hover:bg-[#F5F6F8] transition-colors"
             >
@@ -153,17 +166,27 @@ export default function CartDrawer({
 
           {/* Drawer Body (Scrollable) */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            
             {/* Minimum Order Warning Alert */}
             {!isMinOrderMet && cartItems.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-left">
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold text-amber-800 font-poppins">Pedido Mínimo de Atacado</h4>
+                  <h4 className="text-sm font-bold text-amber-800 font-poppins">
+                    Pedido Mínimo de Atacado
+                  </h4>
                   <p className="text-xs text-amber-700 font-inter mt-1 leading-relaxed">
-                    Você selecionou <strong className="font-semibold">{totalQuantity}</strong> {totalQuantity === 1 ? "peça" : "peças"}. 
-                    Para comprar no preço de fábrica, seu pedido deve conter no mínimo <strong className="font-semibold">{minOrderQuantity}</strong> peças. 
-                    Adicione mais <strong className="font-semibold">{minOrderQuantity - totalQuantity}</strong> {minOrderQuantity - totalQuantity === 1 ? "peça" : "peças"}.
+                    Você selecionou{" "}
+                    <strong className="font-semibold">{totalQuantity}</strong>{" "}
+                    {totalQuantity === 1 ? "peça" : "peças"}. Para comprar no
+                    preço de fábrica, seu pedido deve conter no mínimo{" "}
+                    <strong className="font-semibold">
+                      {minOrderQuantity}
+                    </strong>{" "}
+                    peças. Adicione mais{" "}
+                    <strong className="font-semibold">
+                      {minOrderQuantity - totalQuantity}
+                    </strong>{" "}
+                    {minOrderQuantity - totalQuantity === 1 ? "peça" : "peças"}.
                   </p>
                 </div>
               </div>
@@ -175,21 +198,28 @@ export default function CartDrawer({
                 <div className="bg-[#F5F6F8] p-5 rounded-full mb-4">
                   <Truck className="w-10 h-10 text-primary/50" />
                 </div>
-                <h3 className="font-bold font-poppins text-text-main">Seu carrinho está vazio</h3>
+                <h3 className="font-bold font-poppins text-text-main">
+                  Seu carrinho está vazio
+                </h3>
                 <p className="text-xs font-inter mt-1 max-w-[250px]">
-                  Navegue pelo nosso catálogo e selecione mantos para iniciar sua cotação de atacado.
+                  Navegue pelo nosso catálogo e selecione mantos para iniciar
+                  sua cotação de atacado.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => (
-                  <div 
-                    key={`${item.id}-${item.size}`} 
+                  <div
+                    key={`${item.id}-${item.size}`}
                     className="flex gap-4 p-4 rounded-xl border border-[#E5E7EB] bg-white shadow-xs"
                   >
-                    <img 
-                      src={item.images && item.images[0] ? item.images[0] : "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=150"} 
-                      alt={item.title} 
+                    <img
+                      src={
+                        item.images && item.images[0]
+                          ? item.images[0]
+                          : "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=150"
+                      }
+                      alt={item.title}
                       className="w-16 h-16 object-cover rounded-lg border border-gray-100"
                     />
                     <div className="flex-1 flex flex-col justify-between">
@@ -198,15 +228,22 @@ export default function CartDrawer({
                           {item.title}
                         </h4>
                         <p className="text-[10px] text-text-sec font-bold font-inter uppercase mt-0.5">
-                          Tamanho: <span className="text-primary">{item.size}</span>
+                          Tamanho:{" "}
+                          <span className="text-primary">{item.size}</span>
                         </p>
                       </div>
-                      
+
                       {/* Quantity & Actions Bar */}
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-gray-200 rounded-lg">
-                          <button 
-                            onClick={() => onUpdateQuantity(item.id, item.size, item.quantity - 1)}
+                          <button
+                            onClick={() =>
+                              onUpdateQuantity(
+                                item.id,
+                                item.size,
+                                item.quantity - 1,
+                              )
+                            }
                             className="p-1 text-gray-500 hover:text-text-main transition-colors"
                           >
                             <Minus className="w-3.5 h-3.5" />
@@ -214,14 +251,20 @@ export default function CartDrawer({
                           <span className="px-2 text-xs font-bold font-montserrat text-text-main min-w-[20px] text-center">
                             {item.quantity}
                           </span>
-                          <button 
-                            onClick={() => onUpdateQuantity(item.id, item.size, item.quantity + 1)}
+                          <button
+                            onClick={() =>
+                              onUpdateQuantity(
+                                item.id,
+                                item.size,
+                                item.quantity + 1,
+                              )
+                            }
                             className="p-1 text-gray-500 hover:text-text-main transition-colors"
                           >
                             <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <button 
+                        <button
                           onClick={() => onRemoveItem(item.id, item.size)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
                           title="Remover item"
@@ -247,7 +290,7 @@ export default function CartDrawer({
                   <Truck className="w-4 h-4 text-primary" />
                   Simulador de Frete (Origem: Castanhal-PA)
                 </h3>
-                
+
                 <form onSubmit={handleCepSearch} className="flex gap-2">
                   <input
                     type="text"
@@ -266,7 +309,9 @@ export default function CartDrawer({
                 </form>
 
                 {cepError && (
-                  <p className="text-[11px] font-semibold text-red-500 font-inter mt-2">{cepError}</p>
+                  <p className="text-[11px] font-semibold text-red-500 font-inter mt-2">
+                    {cepError}
+                  </p>
                 )}
 
                 {address && (
@@ -275,9 +320,12 @@ export default function CartDrawer({
                     <div className="bg-white p-3 rounded-lg border border-gray-200/50 flex gap-2">
                       <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                       <div className="text-left">
-                        <p className="text-xs font-bold text-text-main font-poppins">Destinatário</p>
+                        <p className="text-xs font-bold text-text-main font-poppins">
+                          Destinatário
+                        </p>
                         <p className="text-[10px] text-text-sec font-semibold font-inter mt-0.5 leading-tight">
-                          {address.rua}, {address.bairro}<br />
+                          {address.rua}, {address.bairro}
+                          <br />
                           {address.cidade} - {address.uf} | CEP: {address.cep}
                         </p>
                       </div>
@@ -295,11 +343,15 @@ export default function CartDrawer({
                             : "border-gray-200 bg-white hover:border-gray-300"
                         }`}
                       >
-                        <p className="text-[10px] font-bold text-text-sec uppercase font-inter">PAC Correios</p>
+                        <p className="text-[10px] font-bold text-text-sec uppercase font-inter">
+                          PAC Correios
+                        </p>
                         <p className="text-sm font-extrabold text-primary font-montserrat mt-0.5">
                           R$ {shippingRates.pac.toFixed(2)}
                         </p>
-                        <p className="text-[9px] font-semibold text-text-sec font-inter mt-1">8 a 15 dias úteis</p>
+                        <p className="text-[9px] font-semibold text-text-sec font-inter mt-1">
+                          8 a 15 dias úteis
+                        </p>
                       </button>
 
                       {/* SEDEX Option */}
@@ -312,24 +364,26 @@ export default function CartDrawer({
                             : "border-gray-200 bg-white hover:border-gray-300"
                         }`}
                       >
-                        <p className="text-[10px] font-bold text-text-sec uppercase font-inter">SEDEX Correios</p>
+                        <p className="text-[10px] font-bold text-text-sec uppercase font-inter">
+                          SEDEX Correios
+                        </p>
                         <p className="text-sm font-extrabold text-primary font-montserrat mt-0.5">
                           R$ {shippingRates.sedex.toFixed(2)}
                         </p>
-                        <p className="text-[9px] font-semibold text-text-sec font-inter mt-1">3 a 6 dias úteis</p>
+                        <p className="text-[9px] font-semibold text-text-sec font-inter mt-1">
+                          3 a 6 dias úteis
+                        </p>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             )}
-
           </div>
 
           {/* Drawer Footer Summary */}
           {cartItems.length > 0 && (
             <div className="p-6 border-t border-[#F0F0F0] bg-white space-y-4 shadow-2xl">
-              
               {/* Financial Breakdown */}
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-semibold text-text-sec font-inter">
@@ -338,16 +392,20 @@ export default function CartDrawer({
                     R$ {itemsSubtotal.toFixed(2)}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between text-xs font-semibold text-text-sec font-inter">
                   <span>Frete calculado:</span>
                   <span className="font-bold font-montserrat text-text-main">
-                    {shippingType ? `R$ ${selectedShippingCost.toFixed(2)}` : "A combinar"}
+                    {shippingType
+                      ? `R$ ${selectedShippingCost.toFixed(2)}`
+                      : "A combinar"}
                   </span>
                 </div>
 
                 <div className="pt-3 border-t border-gray-100 flex justify-between items-baseline">
-                  <span className="text-sm font-bold font-poppins text-text-main">Valor Total:</span>
+                  <span className="text-sm font-bold font-poppins text-text-main">
+                    Valor Total:
+                  </span>
                   <span className="text-2xl font-extrabold font-montserrat text-[#0F766E]">
                     R$ {finalTotal.toFixed(2)}
                   </span>
@@ -370,7 +428,6 @@ export default function CartDrawer({
               </button>
             </div>
           )}
-
         </div>
       </div>
     </div>

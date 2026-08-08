@@ -46,7 +46,7 @@ export default function Header({
               ATACADÃO <span className="text-primary">DOS MANTOS</span>
             </h1>
             <p className="text-[10px] text-text-sec font-semibold tracking-wider uppercase font-inter mt-0.5">
-              Distribuidora Oficial Premium
+              Distribuidora Premium
             </p>
           </div>
         </div>

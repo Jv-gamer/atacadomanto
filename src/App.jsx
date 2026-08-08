@@ -153,7 +153,7 @@ export default function App() {
   if (loadingProducts) {
     return (
       <div className="flex h-screen items-center justify-center">
-        Carregando produtos...
+        Carregando sua paixão...
       </div>
     );
   }
@@ -303,14 +303,14 @@ export default function App() {
       id: "new-manto-" + Date.now(),
       title: "Nova Camisa de Futebol",
       category: defaultCat,
-      description: "Descreva brevemente este manto para os lojistas.",
+      description: "Descreva brevemente este manto.",
       price: 79.9,
       stock: { P: 10, M: 10, G: 10, GG: 10, EG: 5, XG: 5, "3G": 5 },
       images: [
         "https://images.unsplash.com/photo-1543351611-58f69d7c1781?q=80&w=600",
       ],
       technicalDetails:
-        "100% Poliéster Premium. Lavável à máquina. Tecido respirável de alta durabilidade.",
+        "Esta camisa une alta performance e estilo para o torcedor. Confeccionada em tecido 100% poliéster, ela conta com tecnologia de absorção de suor, mantendo o corpo seco e fresco. Seu caimento leve oferece total liberdade de movimento para o uso no dia a dia ou na prática de esportes. O modelo traz o escudo do clube em acabamento premium, garantindo alta durabilidade contra o desgaste e as lavagens.",
     };
 
     setDetailsProduct(newManto);
@@ -348,7 +348,7 @@ export default function App() {
         <div className="bg-amber-600 text-white px-4 py-2.5 flex items-center justify-between text-xs font-bold font-poppins shadow-md z-50 sticky top-0 border-b border-amber-700/30">
           <span className="flex items-center gap-2 uppercase tracking-wider">
             <ShieldCheck className="w-5 h-5 animate-pulse" /> Painel de
-            Gerenciamento do Atacadão Ativo
+            Gerenciamento do Ativo
           </span>
           <button
             onClick={() => setIsAdmin(false)}
@@ -478,8 +478,8 @@ export default function App() {
                 </h2>
                 <p className="text-xs sm:text-sm text-text-sec font-inter mt-1 max-w-2xl leading-relaxed">
                   As camisas mais vendidas do futebol nacional. Modelagens
-                  torcedor e jogador prontas para envio imediato aos lojistas de
-                  todo o Brasil.
+                  torcedor e jogador prontas para envio imediato para todo o
+                  Brasil.
                 </p>
               </div>
               <span className="text-xs font-bold font-montserrat text-primary uppercase tracking-widest bg-primary/10 px-3.5 py-1.5 rounded-lg shrink-0">
@@ -592,8 +592,11 @@ export default function App() {
               Distribuidor Oficial Premium
             </p>
             <p className="text-xs text-gray-300 leading-relaxed pt-2">
-              O maior distribuidor de camisas de futebol do Brasil. Atendemos
-              lojistas, revendedores e compras em atacado para todo o Brasil.
+              Bem-vindo à maior autoridade em mantos sagrados! Nossa loja nasceu
+              da paixão pelo futebol para vestir o torcedor com o que há de
+              melhor no mercado esportivo. Reunimos em um só lugar os
+              lançamentos mais aguardados, modelos clássicos e edições
+              exclusivas dos maiores clubes do mundo.
             </p>
           </div>
 
@@ -639,7 +642,7 @@ export default function App() {
               </li>
               <li className="flex items-center gap-2.5">
                 <MapPin className="w-4.5 h-4.5 text-primary shrink-0" />
-                <span>Castanhal - PA | CEP: 68742-450</span>
+                <span>Castanhal - PA</span>
               </li>
             </ul>
           </div>
@@ -715,9 +718,8 @@ export default function App() {
         {/* Footer Bottom Block */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
           <p className="text-center sm:text-left leading-relaxed">
-            Atendemos lojistas, revendedores e compras em atacado para todo o
-            Brasil. <br />© 2026 Atacadão dos Mantos. Todos os direitos
-            reservados.
+            Atendemos para todo o Brasil. <br />© 2026 Atacadão dos Mantos.
+            Todos os direitos reservados.
           </p>
 
           {/* Restricted Hidden login trigger */}

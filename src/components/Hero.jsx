@@ -4,8 +4,8 @@ import { Check } from "lucide-react";
 export default function Hero({ onCatalogClick }) {
   const indicators = [
     "Envio para todo Brasil",
-    "Frete rápido",
-    "Pedido mínimo de 5 peças",
+    "Tailandesa 1.1",
+    "Frete Grátis em 6 peças",
     "Produtos Premium",
   ];
 
@@ -17,16 +17,15 @@ export default function Hero({ onCatalogClick }) {
           {/* Left Column: Branding Copy */}
           <div className="flex flex-col space-y-6 text-left">
             <span className="inline-block bg-[#0F766E]/10 text-primary text-xs font-bold font-poppins px-3 py-1.5 rounded-full uppercase tracking-wider self-start">
-              Distribuidora Oficial
+              Tailandesa 1.1
             </span>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-poppins text-text-main leading-tight">
-              O maior atacado de <br />
-              <span className="text-primary">camisas de futebol</span> do Brasil
+              A sua loja de <br />
+              <span className="text-primary">camisas de futebol</span> no Brasil
             </h2>
             <p className="text-text-sec text-base sm:text-lg font-inter leading-relaxed max-w-xl">
               Trabalhamos com camisas nacionais e internacionais, versões
-              torcedor e jogador, pedidos para lojistas, revendedores e compras
-              em quantidade.
+              torcedor e jogador.
             </p>
 
             {/* Call to Actions */}
