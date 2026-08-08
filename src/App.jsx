@@ -34,10 +34,28 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem("atacadao_categorias");
-    return saved ? JSON.parse(saved) : defaultCategories;
-  });
+  const [categories, setCategories] = useState(defaultCategories);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Erro ao carregar categorias:", error);
+        setLoadingCategories(false);
+        return;
+      }
+
+      setCategories(data.map((category) => category.name));
+      setLoadingCategories(false);
+    };
+
+    loadCategories();
+  }, []);
 
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem("atacadao_carrinho");
@@ -76,10 +94,6 @@ export default function App() {
   const [detailsProduct, setDetailsProduct] = useState(null);
 
   // --- Sync States to LocalStorage ---
-  useEffect(() => {
-    localStorage.setItem("atacadao_categorias", JSON.stringify(categories));
-  }, [categories]);
-
   useEffect(() => {
     localStorage.setItem("atacadao_carrinho", JSON.stringify(cart));
   }, [cart]);
@@ -201,20 +215,81 @@ export default function App() {
   };
 
   // --- Category Handlers ---
-  const handleAddCategory = (newCat) => {
-    if (!categories.includes(newCat)) {
-      setCategories([...categories, newCat]);
+  const handleAddCategory = async (newCat) => {
+    const categoryName = newCat.trim();
+
+    if (!categoryName) return;
+
+    if (categories.includes(categoryName)) {
+      alert("Essa categoria já existe.");
+      return;
     }
+
+    const { data, error } = await supabase
+      .from("categories")
+      .insert([{ name: categoryName }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Erro ao adicionar categoria:", error);
+      alert("Não foi possível adicionar a categoria.");
+      return;
+    }
+
+    setCategories((prevCategories) => [...prevCategories, data.name]);
   };
 
-  const handleDeleteCategory = (catToDelete) => {
-    setCategories(categories.filter((c) => c !== catToDelete));
-    // Fallback products in that deleted category to standard "Brasileirão"
-    setProducts(
-      products.map((p) =>
-        p.category === catToDelete ? { ...p, category: "Brasileirão" } : p,
+  const handleDeleteCategory = async (catToDelete) => {
+    // Impede excluir categorias protegidas
+    const isProtected =
+      catToDelete.toLowerCase() === "brasileirão" ||
+      catToDelete.toLowerCase() === "seleções";
+
+    if (isProtected) {
+      alert("Essa categoria não pode ser excluída.");
+      return;
+    }
+
+    // Move os produtos dessa categoria para "Brasileirão" no Supabase
+    const { error: productsError } = await supabase
+      .from("products")
+      .update({ category: "Brasileirão" })
+      .eq("category", catToDelete);
+
+    if (productsError) {
+      console.error("Erro ao atualizar produtos da categoria:", productsError);
+      alert("Não foi possível atualizar os produtos dessa categoria.");
+      return;
+    }
+
+    // Exclui a categoria do Supabase
+    const { error: categoryError } = await supabase
+      .from("categories")
+      .delete()
+      .eq("name", catToDelete);
+
+    if (categoryError) {
+      console.error("Erro ao excluir categoria:", categoryError);
+      alert("Não foi possível excluir a categoria.");
+      return;
+    }
+
+    // Atualiza as categorias na interface
+    setCategories((prevCategories) =>
+      prevCategories.filter((category) => category !== catToDelete),
+    );
+
+    // Atualiza os produtos na interface
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.category === catToDelete
+          ? { ...product, category: "Brasileirão" }
+          : product,
       ),
     );
+
+    // Limpa a seleção caso a categoria excluída estivesse selecionada
     if (selectedCategory === catToDelete) {
       setSelectedCategory("");
     }
