@@ -1,13 +1,13 @@
 import React from "react";
 import * as Icons from "lucide-react";
 
-export default function CategoryBar({ 
-  categories, 
-  selectedCategory, 
+export default function CategoryBar({
+  categories,
+  selectedCategory,
   onSelectCategory,
   onAddCategory,
   onDeleteCategory,
-  isAdmin = false
+  isAdmin = false,
 }) {
   const [isAddingCategory, setIsAddingCategory] = React.useState(false);
   const [newCatName, setNewCatName] = React.useState("");
@@ -20,8 +20,8 @@ export default function CategoryBar({
       setIsAddingCategory(false);
     }
   };
-  
-  // Icon mapper helper
+
+  // Mapeador de ícones auxiliares
   const getCategoryIcon = (categoryName) => {
     const name = categoryName.toLowerCase();
     if (name.includes("brasileirão") || name.includes("brasil")) {
@@ -46,19 +46,17 @@ export default function CategoryBar({
   };
 
   return (
-    <div className="w-full bg-white border-b border-[#F0F0F0] py-4 sticky top-20 z-30 shadow-xs">
+    <div className="w-full bg-white dark:bg-slate-900 border-b border-[#F0F0F0] dark:border-slate-800 py-4 sticky top-20 z-30 shadow-xs transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Horizontal Scrolling Box */}
+        {/* Caixa de Rolagem Horizontal */}
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1.5 -mx-4 px-4 sm:mx-0 sm:px-0">
-          
-          {/* "Todos" Option */}
+          {/* Opção "Todos" */}
           <button
             onClick={() => onSelectCategory("")}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold font-poppins transition-all shrink-0 border select-none ${
               selectedCategory === ""
                 ? "bg-primary text-white border-primary shadow-xs"
-                : "bg-white text-text-main border-[#E5E7EB] hover:border-primary/50 hover:bg-[#F5F6F8]"
+                : "bg-white dark:bg-slate-800 text-text-main dark:text-white border-[#E5E7EB] dark:border-slate-700 hover:border-primary/50 hover:bg-[#F5F6F8] dark:hover:bg-slate-700"
             }`}
           >
             <Icons.Boxes className="w-5 h-5" />
@@ -67,7 +65,9 @@ export default function CategoryBar({
 
           {categories.map((category) => {
             const isSelected = selectedCategory === category;
-            const isProtected = category.toLowerCase() === "brasileirão" || category.toLowerCase() === "seleções";
+            const isProtected =
+              category.toLowerCase() === "brasileirão" ||
+              category.toLowerCase() === "seleções";
             return (
               <div
                 key={category}
@@ -78,7 +78,7 @@ export default function CategoryBar({
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold font-poppins transition-all border select-none ${
                     isSelected
                       ? "bg-primary text-white border-primary shadow-xs"
-                      : "bg-white text-text-main border-[#E5E7EB] hover:border-primary/50 hover:bg-[#F5F6F8]"
+                      : "bg-white dark:bg-slate-800 text-text-main dark:text-white border-[#E5E7EB] dark:border-slate-700 hover:border-primary/50 hover:bg-[#F5F6F8] dark:hover:bg-slate-700"
                   } ${isAdmin && !isProtected ? "pr-10" : ""}`}
                 >
                   {getCategoryIcon(category)}
@@ -102,11 +102,14 @@ export default function CategoryBar({
             );
           })}
 
-          {/* Admin panel triggers for creating categories */}
+          {/* Painel do Admin para criar categorias */}
           {isAdmin && (
             <div className="shrink-0 flex items-center">
               {isAddingCategory ? (
-                <form onSubmit={handleAddSubmit} className="flex items-center gap-1.5 bg-amber-50/50 p-1.5 rounded-xl border border-amber-200">
+                <form
+                  onSubmit={handleAddSubmit}
+                  className="flex items-center gap-1.5 bg-amber-50/50 dark:bg-amber-950/20 p-1.5 rounded-xl border border-amber-200 dark:border-amber-900/50"
+                >
                   <input
                     type="text"
                     required
@@ -114,18 +117,18 @@ export default function CategoryBar({
                     value={newCatName}
                     onChange={(e) => setNewCatName(e.target.value)}
                     placeholder="Nova categoria..."
-                    className="bg-white border border-gray-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-primary w-36"
+                    className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-semibold rounded-lg px-2.5 py-1.5 text-text-main dark:text-white focus:outline-none focus:border-primary w-36"
                   />
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="bg-primary text-white p-1.5 rounded-lg hover:bg-primary-hover transition-colors cursor-pointer"
                   >
                     <Icons.Check className="w-3.5 h-3.5" />
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setIsAddingCategory(false)}
-                    className="bg-gray-100 text-gray-500 p-1.5 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                    className="bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors cursor-pointer"
                   >
                     <Icons.X className="w-3.5 h-3.5" />
                   </button>
@@ -134,7 +137,7 @@ export default function CategoryBar({
                 <button
                   type="button"
                   onClick={() => setIsAddingCategory(true)}
-                  className="flex items-center gap-1 px-4 py-2.5 rounded-full text-xs font-bold font-poppins bg-amber-50 hover:bg-amber-100 text-amber-700 border border-dashed border-amber-300 transition-colors select-none cursor-pointer"
+                  className="flex items-center gap-1 px-4 py-2.5 rounded-full text-xs font-bold font-poppins bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-dashed border-amber-300 dark:border-amber-800 transition-colors select-none cursor-pointer"
                 >
                   <Icons.Plus className="w-4 h-4" />
                   Criar Categoria

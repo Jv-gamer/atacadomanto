@@ -1,5 +1,5 @@
-import React from "react";
-import { ShoppingCart, Phone } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ShoppingCart, Phone, Sun, Moon } from "lucide-react";
 import logo from "../assets/logo.svg";
 
 export default function Header({
@@ -8,6 +8,16 @@ export default function Header({
   cartCount,
   onOpenCart,
 }) {
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    document.body.classList.toggle("dark", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
   const navItems = [
     { id: "inicio", label: "Início" },
     { id: "brasil", label: "Brasileirão" },
@@ -29,7 +39,7 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-[#F0F0F0] shadow-sm">
+    <header className="sticky top-0 z-40 w-full bg-white dark:bg-slate-900 border-b border-[#F0F0F0] dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo Section */}
         <div
@@ -42,7 +52,7 @@ export default function Header({
             className="w-10 h-10 object-contain"
           />
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold font-poppins text-[#111827] tracking-tight leading-none">
+            <h1 className="text-xl sm:text-2xl font-extrabold font-poppins text-[#111827] dark:text-white tracking-tight leading-none">
               ATACADÃO <span className="text-primary">DOS MANTOS</span>
             </h1>
             <p className="text-[10px] text-text-sec font-semibold tracking-wider uppercase font-inter mt-0.5">
@@ -62,7 +72,7 @@ export default function Header({
                 className={`font-semibold font-poppins text-sm tracking-wide transition-colors py-2 relative ${
                   isActive
                     ? "text-primary"
-                    : "text-text-main hover:text-primary-hover"
+                    : "text-text-main dark:text-white hover:text-primary-hover"
                 }`}
               >
                 {item.label}
@@ -76,11 +86,25 @@ export default function Header({
 
         {/* Action Controls */}
         <div className="flex items-center gap-4">
+          {/* Dark Mode Toggle */}
+          <button
+            type="button"
+            onClick={() => setDarkMode((prev) => !prev)}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-text-main hover:bg-black/5 dark:text-white dark:hover:bg-white/10 transition-all"
+            aria-label={darkMode ? "Ativar modo claro" : "Ativar modo escuro"}
+          >
+            {darkMode ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
+
           {/* Cart Icon Toggle */}
           <button
             onClick={onOpenCart}
             aria-label="Abrir carrinho"
-            className="relative p-2.5 text-text-main hover:text-primary transition-colors hover:bg-[#F5F6F8] rounded-full"
+            className="relative w-10 h-10 rounded-full flex items-center justify-center text-text-main dark:text-white hover:text-primary transition-all hover:bg-black/5 dark:hover:bg-white/10"
           >
             <ShoppingCart className="w-6 h-6" />
             {cartCount > 0 && (

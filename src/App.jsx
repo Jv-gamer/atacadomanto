@@ -472,7 +472,7 @@ export default function App() {
               id="catalog-grid"
               className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-              <div className="flex flex-col md:flex-row md:items-baseline justify-between border-b border-gray-200 pb-5 mb-8 text-left">
+              <div className="flex flex-col md:flex-row md:items-baseline justify-between border-b border-gray-200 dark:border-slate-700 pb-5 mb-8 text-left">
                 <div>
                   <h3 className="text-xl sm:text-2xl font-extrabold font-poppins text-text-main">
                     {selectedCategory
@@ -498,15 +498,15 @@ export default function App() {
                 {isAdmin && (
                   <button
                     onClick={triggerAddProduct}
-                    className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/50 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800"
+                    className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 dark:border-amber-700 hover:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800 dark:text-amber-300"
                   >
-                    <div className="bg-amber-100 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
-                      <Plus className="w-8 h-8 text-amber-700 stroke-[3]" />
+                    <div className="bg-amber-100 dark:bg-amber-900/40 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
+                      <Plus className="w-8 h-8 text-amber-600 dark:text-amber-400 stroke-[3]" />
                     </div>
                     <span className="font-extrabold font-poppins text-sm tracking-wide uppercase">
                       + Adicionar Manto
                     </span>
-                    <span className="text-[10px] font-semibold font-inter mt-1 text-amber-600 uppercase tracking-widest">
+                    <span className="text-[10px] font-semibold font-inter mt-1 text-amber-600 dark:text-amber-400 uppercase tracking-widest">
                       Novo Produto no Lote
                     </span>
                   </button>
@@ -543,7 +543,7 @@ export default function App() {
         {/* Brasileirão Specific Tab */}
         {activeTab === "brasil" && (
           <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs">
+            <div className="bg-white dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 rounded-2xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs">
               <div>
                 <span className="bg-[#0f766e]/10 text-primary text-[10px] font-bold font-poppins px-2.5 py-1.5 rounded-full uppercase tracking-wider">
                   Clubes Nacionais
@@ -566,15 +566,15 @@ export default function App() {
               {isAdmin && (
                 <button
                   onClick={triggerAddProduct}
-                  className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/50 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800"
+                  className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 dark:border-amber-700 hover:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800 dark:text-amber-300"
                 >
-                  <div className="bg-amber-100 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
-                    <Plus className="w-8 h-8 text-amber-700 stroke-[3]" />
+                  <div className="bg-amber-100 dark:bg-amber-900/40 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
+                    <Plus className="w-8 h-8 text-amber-700 dark:text-amber-300 stroke-[3]" />
                   </div>
                   <span className="font-extrabold font-poppins text-sm tracking-wide uppercase">
                     + Adicionar Manto
                   </span>
-                  <span className="text-[10px] font-semibold font-inter mt-1 text-amber-600 uppercase tracking-widest">
+                  <span className="text-[10px] font-semibold font-inter mt-1 text-amber-600 dark:text-amber-400 uppercase tracking-widest">
                     Pre-fill: Brasileirão
                   </span>
                 </button>
@@ -597,7 +597,7 @@ export default function App() {
         {/* Seleções Specific Tab */}
         {activeTab === "selecoes" && (
           <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs">
+            <div className="bg-white dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 rounded-2xl p-8 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs">
               <div>
                 <span className="bg-[#0f766e]/10 text-primary text-[10px] font-bold font-poppins px-2.5 py-1.5 rounded-full uppercase tracking-wider">
                   Nacionais e Internacionais
@@ -620,9 +620,9 @@ export default function App() {
               {isAdmin && (
                 <button
                   onClick={triggerAddProduct}
-                  className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/50 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800"
+                  className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-300 dark:border-amber-700 hover:border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 hover:bg-amber-50/50 dark:hover:bg-amber-950/40 rounded-2xl transition-all h-[420px] cursor-pointer group text-amber-800 dark:text-amber-300"
                 >
-                  <div className="bg-amber-100 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
+                  <div className="bg-amber-100 dark:bg-amber-900/40 p-4 rounded-full mb-3 group-hover:scale-108 transition-transform">
                     <Plus className="w-8 h-8 text-amber-700 stroke-[3]" />
                   </div>
                   <span className="font-extrabold font-poppins text-sm tracking-wide uppercase">

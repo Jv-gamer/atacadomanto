@@ -21,39 +21,38 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+      {/* Fundo escurecido externo */}
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
 
-      {/* Modal Box */}
-      <div className="relative bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 text-left z-10">
-        
-        {/* Close Button */}
-        <button 
+      {/* Caixa do Modal */}
+      <div className="relative bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 dark:border-slate-700 text-left z-10 transition-colors duration-200">
+        {/* Botão de Fechar */}
+        <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 bg-[#F5F6F8] hover:bg-gray-200 rounded-full text-text-sec transition-colors"
+          className="absolute top-4 right-4 p-1.5 bg-[#F5F6F8] dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-text-sec dark:text-slate-400 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {/* Title & Icon */}
+        {/* Título & Ícone */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-primary/10 p-2.5 rounded-xl text-primary">
+          <div className="bg-primary/10 p-2.5 rounded-xl text-primary dark:text-teal-400">
             <Lock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold font-poppins text-text-main">
+            <h3 className="text-base font-bold font-poppins text-text-main dark:text-white">
               Acesso Restrito
             </h3>
-            <p className="text-[10px] font-semibold text-text-sec uppercase tracking-wide font-inter">
+            <p className="text-[10px] font-semibold text-text-sec dark:text-slate-400 uppercase tracking-wide font-inter">
               Painel de Gerenciamento
             </p>
           </div>
         </div>
 
-        {/* Password Form */}
+        {/* Formulário da Senha */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-bold text-text-sec uppercase font-inter mb-1.5">
+            <label className="block text-[11px] font-bold text-text-sec dark:text-slate-300 uppercase font-inter mb-1.5">
               Senha de Acesso
             </label>
             <div className="relative">
@@ -63,12 +62,14 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite a senha..."
-                className="w-full bg-[#F5F6F8] border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-xs font-inter focus:outline-none focus:border-primary font-semibold"
+                className="w-full bg-[#F5F6F8] dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2.5 text-xs font-inter text-text-main dark:text-white focus:outline-none focus:border-primary font-semibold"
               />
-              <KeyRound className="w-4 h-4 text-text-sec absolute left-3 top-3.5" />
+              <KeyRound className="w-4 h-4 text-text-sec dark:text-slate-400 absolute left-3 top-3.5" />
             </div>
             {error && (
-              <p className="text-[10px] font-semibold text-red-500 font-inter mt-1.5">{error}</p>
+              <p className="text-[10px] font-semibold text-red-500 dark:text-red-400 font-inter mt-1.5">
+                {error}
+              </p>
             )}
           </div>
 
@@ -79,7 +80,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             Confirmar Senha
           </button>
         </form>
-
       </div>
     </div>
   );
